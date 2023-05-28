@@ -3,16 +3,10 @@ import "StaticATokenLM_base.spec"
 // xuwinnie : properties related to rewards ... I mean contest rewards
 
 /////////////////// CATCHER ////////////////////////
-// a stronger version of this (in staticATokenLM_issues.spec) reveals an error
-// takes almost 2 hour
-rule noMoreThanMaxRedeemUnderlying_bug9 (env e, address a, address b) {
-    mathint maxRedeem = maxRedeemUnderlying (e,a);
-    require (maxRedeem != 0);
-
-    uint inputShares;
-    require inputShares == 2 * maxRedeem + 2;
-    redeem@withrevert(e,inputShares,b,a,true);
-    assert lastReverted;
+// can not redeem more than balance of pool
+rule maxRedeemUnderlying_bug9 (env e, address a) {
+    uint maxRedeem = maxRedeemUnderlying (e,a);
+    assert convertToAssets(e,maxRedeem) <= _DummyERC20_aTokenUnderlying.balanceOf(_AToken); 
 }
 
 // balance of Atoken should decrease as expect
