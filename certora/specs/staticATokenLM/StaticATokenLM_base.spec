@@ -8,9 +8,9 @@ import "../methods/methods_base.spec"
         getIncentivesController() returns (address) => CONSTANT
         getRewardsList() returns (address[]) => NONDET
         //call by RewardsController.IncentivizedERC20.sol and also by StaticATokenLM.sol
-        handleAction(address,uint256,uint256) => DISPATCHER(true)
+        handleAction(address,uint256,uint256) 
     }
-
+/*
 ////////////////// FUNCTIONS //////////////////////
 
     /// @title Reward hook

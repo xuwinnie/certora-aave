@@ -16,8 +16,18 @@ contract StaticATokenLMHarness is StaticATokenLM{
         IRewardsController rewardsController
         ) StaticATokenLM(pool, rewardsController){}
 
+    // returns the address of itself
+    function getSelf() public view returns (address){
+        return address(this);
+    }
+
     // returns the address of the underlying asset of the static aToken
-    function getStaticATokenUnderlying() public view returns (address){
+    function getAToken() public view returns (address){
+        return address(_aToken);
+    }
+
+    // returns the address of the underlying asset of the static aToken
+    function getATokenUnderlying() public view returns (address){
         return _aTokenUnderlying;
     }
 
@@ -86,4 +96,19 @@ contract StaticATokenLMHarness is StaticATokenLM{
 
     }
 
+    struct SignatureParamsHarness {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    struct PermitParamsHarness {
+        address owner;
+        address spender;
+        uint256 value;
+        uint256 deadline;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
 }
