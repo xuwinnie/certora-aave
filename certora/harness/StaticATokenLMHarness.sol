@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
 
 import {StaticATokenLM, StaticATokenErrors,  IPool, IRewardsController, IERC20} from '../../src/StaticATokenLM.sol';
 import {SymbolicLendingPool} from './pool/SymbolicLendingPool.sol';
-import {DataTypes, ReserveConfiguration} from '../../lib/aave-v3-core/contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 
 
 
@@ -17,8 +16,18 @@ contract StaticATokenLMHarness is StaticATokenLM{
         IRewardsController rewardsController
         ) StaticATokenLM(pool, rewardsController){}
 
+    // returns the address of itself
+    function getSelf() public view returns (address){
+        return address(this);
+    }
+
     // returns the address of the underlying asset of the static aToken
-    function getStaticATokenUnderlying() public view returns (address){
+    function getAToken() public view returns (address){
+        return address(_aToken);
+    }
+
+    // returns the address of the underlying asset of the static aToken
+    function getATokenUnderlying() public view returns (address){
         return _aTokenUnderlying;
     }
 
@@ -87,9 +96,19 @@ contract StaticATokenLMHarness is StaticATokenLM{
 
     }
 
-    function getReserveData_AToken() public view returns (address) {
-        address cachedATokenUnderlying = _aTokenUnderlying;
-        // DataTypes.ReserveData memory reserveData = POOL.getReserveData(cachedATokenUnderlying);
-        return POOL.getReserveData(cachedATokenUnderlying).aTokenAddress;
+    struct SignatureParamsHarness {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    struct PermitParamsHarness {
+        address owner;
+        address spender;
+        uint256 value;
+        uint256 deadline;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
     }
 }

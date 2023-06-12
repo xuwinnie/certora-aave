@@ -14,43 +14,41 @@ methods
 {
     // static aToken
 	// -------------
-        asset() returns (address) envfree
+        asset() returns (address)
         totalAssets() returns (uint256)
         maxWithdraw(address owner) returns (uint256)
-        maxRedeem(address owner) returns (uint256) envfree
+        maxRedeem(address owner) returns (uint256)
         previewWithdraw(uint256) returns (uint256)
+        previewDeposit(uint256) returns (uint256)
         previewRedeem(uint256) returns (uint256)
-        maxDeposit(address) returns (uint256) envfree
+        maxDeposit(address) returns (uint256)
         previewMint(uint256) returns (uint256)
-        maxMint(address) returns (uint256) envfree
+        maxMint(address) returns (uint256)
         rate() returns (uint256)
         getUnclaimedRewards(address, address) returns (uint256) envfree
         rewardTokens() returns (address[]) envfree
         isRegisteredRewardToken(address) returns (bool) envfree
+        metaDeposit(address,address,uint256,uint16,bool,uint256,_StaticATokenLM.SignatureParamsHarness,_StaticATokenLM.PermitParamsHarness) returns (uint256)
         
     // static aToken harness
     // ---------------------
-        getStaticATokenUnderlying() returns (address) envfree
+        getATokenUnderlying() returns (address)
         getRewardsIndexOnLastInteraction(address, address) returns (uint128) envfree
         getRewardTokensLength() returns (uint256) envfree 
         getRewardToken(uint256) returns (address) envfree
-        getReserveData_AToken() returns (address) envfree
-
-    // erc20
-    // -----
-        transferFrom(address,address,uint256) returns (bool) => DISPATCHER(true)
+        getAToken() returns (address)
+        getSelf() returns (address) envfree
 
     // pool
     // ----
         _SymbolicLendingPool.getReserveNormalizedIncome(address) returns (uint256)
-        getReserveData(address) returns ((uint256),uint128,uint128,uint128,uint128,uint128,uint40,uint16,address,address,address,address,uint128,uint128,uint128) envfree => CONSTANT
-	
+
     // rewards controller
 	// ------------------
         // In RewardsDistributor.sol called by RewardsController.sol
-        getAssetIndex(address, address) returns (uint256, uint256) => DISPATCHER(true)
+        getAssetIndex(address, address) returns (uint256, uint256)
         // In ScaledBalanceTokenBase.sol called by getAssetIndex
-        scaledTotalSupply() returns (uint256)  => DISPATCHER(true) 
+        scaledTotalSupply() returns (uint256)   
         // Called by RewardsController._transferRewards()
         // Defined in TransferStrategyHarness as simple transfer() 
         performTransfer(address,address,uint256) returns (bool) =>  DISPATCHER(true)
@@ -75,7 +73,7 @@ methods
     // aToken
 	// ------
         _AToken.balanceOf(address) returns (uint256)
-        _AToken.totalSupply() returns (uint256)
+        _AToken.totalSupply() returns (uint256) envfree
         _AToken.allowance(address, address) returns (uint256) envfree
         _AToken.UNDERLYING_ASSET_ADDRESS() returns (address) envfree
         _AToken.scaledBalanceOf(address) returns (uint256) envfree
@@ -85,7 +83,7 @@ methods
         finalizeTransfer(address, address, address, uint256, uint256, uint256) => NONDET  
         // Called by rewardscontroller.sol
         // Defined in scaledbalancetokenbase.sol
-        getScaledUserBalanceAndSupply(address) returns (uint256, uint256) => DISPATCHER(true)
+        getScaledUserBalanceAndSupply(address) returns (uint256, uint256) 
 
     // reward token
     // ------------
@@ -93,18 +91,29 @@ methods
         _DummyERC20_rewardToken.totalSupply() returns (uint256) envfree
 
         UNDERLYING_ASSET_ADDRESS() returns (address) envfree => CONSTANT UNRESOLVED
-
-    // ReserveConfiguration
-        getActive((uint256)) returns (bool) => CONSTANT
-        getPaused((uint256)) returns (bool) => CONSTANT
-        getFrozen((uint256)) returns (bool) => CONSTANT
-        getDecimals((uint256)) returns (bool) => CONSTANT
-        getSupplyCap((uint256)) returns (bool) => CONSTANT
  }
 
 ///////////////// DEFINITIONS //////////////////////
 
     definition RAY() returns uint256 = 10^27;
+
+    definition NotTooLarge(uint256 n) returns bool = (n <= 2^100);
+
+    definition BalanceDisturbingFunctions(method f) returns bool = 
+        (f.selector == metaDeposit(address,address,uint256,uint16,bool,uint256,(address,address,uint256,uint256,uint8,bytes32,bytes32),(uint8,bytes32,bytes32)).selector ||
+        f.selector == metaWithdraw(address,address,uint256,uint256,bool,uint256,(uint8,bytes32,bytes32)).selector ||
+        f.selector == deposit(uint256,address,uint16,bool).selector ||
+        f.selector == redeem(uint256,address,address,bool).selector ||
+        f.selector == deposit(uint256,address).selector ||
+        f.selector == mint(uint256,address).selector ||
+        f.selector == withdraw(uint256,address,address).selector ||
+        f.selector == redeem(uint256,address,address).selector);
+
+    definition ERC20Functions(method f) returns bool =
+        (f.selector == transfer(address,uint256).selector ||
+        f.selector == transferFrom(address,address,uint256).selector ||
+        f.selector == approve(address,uint256).selector ||
+        f.selector == permit(address,address,uint256,uint256,uint8,bytes32,bytes32).selector);
 
     /// @notice Claim rewards methods
     definition claimFunctions(method f) returns bool = 
@@ -121,11 +130,79 @@ methods
         f.selector == claimDoubleRewardOnBehalfSame(address, address, address).selector);
         
     definition harnessMethodsMinusHarnessClaimMethods(method f) returns bool =
-        (f.selector == getStaticATokenUnderlying().selector ||
+        (f.selector == getATokenUnderlying().selector ||
+        f.selector == getAToken().selector ||
+        f.selector == getSelf().selector ||
         f.selector == getRewardTokensLength().selector ||
         f.selector == getRewardToken(uint256).selector ||
         f.selector == getRewardsIndexOnLastInteraction(address, address).selector ||
         f.selector == getLastUpdatedIndex(address).selector);
+
+    definition AllFunctions(method f) returns bool = 
+        (f.selector == constructor(address,address).selector ||
+        f.selector == nonces(address).selector ||
+        f.selector == name().selector ||
+        f.selector == previewRedeem(uint256).selector ||
+        f.selector == refreshRewardTokens().selector ||
+        f.selector == getClaimableRewards(address,address).selector ||
+        f.selector == asset().selector ||
+        f.selector == STATIC__ATOKEN_LM_REVISION().selector ||
+        f.selector == convertToShares(uint256).selector ||
+        f.selector == totalAssets().selector ||
+        f.selector == deposit(uint256,address,uint16,bool).selector ||
+        f.selector == withdraw(uint256,address,address).selector ||
+        f.selector == redeem(uint256,address,address,bool).selector ||
+        f.selector == getCurrentRewardsIndex(address).selector ||
+        f.selector == METAWITHDRAWAL_TYPEHASH().selector ||
+        f.selector == DOMAIN_SEPARATOR().selector ||
+        f.selector == claimDoubleRewardOnBehalfSame(address,address,address).selector ||
+        f.selector == rewardTokens().selector ||
+        f.selector == aTokenUnderlying().selector ||
+        f.selector == claimRewards(address,address[]).selector ||
+        f.selector == INCENTIVES_CONTROLLER().selector ||
+        f.selector == isRegisteredRewardToken(address).selector ||
+        f.selector == getLastUpdatedIndex(address).selector ||
+        f.selector == getUnclaimedRewards(address,address).selector ||
+        f.selector == claimRewardsToSelf(address[]).selector ||
+        f.selector == rate().selector ||
+        f.selector == maxWithdraw(address).selector ||
+        f.selector == balanceOf(address).selector ||
+        f.selector == approve(address,uint256).selector ||
+        f.selector == maxMint(address).selector ||
+        f.selector == METADEPOSIT_TYPEHASH().selector ||
+        f.selector == previewMint(uint256).selector ||
+        f.selector == convertToAssets(uint256).selector ||
+        f.selector == transfer(address,uint256).selector ||
+        f.selector == getAToken().selector ||
+        f.selector == allowance(address,address).selector ||
+        f.selector == symbol().selector ||
+        f.selector == maxDepositUnderlying(address).selector ||
+        f.selector == getATokenUnderlying().selector ||
+        f.selector == POOL().selector ||
+        f.selector == getRewardsIndexOnLastInteraction(address,address).selector ||
+        f.selector == initialize(address,string,string).selector ||
+        f.selector == collectAndUpdateRewards(address).selector ||
+        f.selector == mint(uint256,address).selector ||
+        f.selector == permit(address,address,uint256,uint256,uint8,bytes32,bytes32).selector ||
+        f.selector == redeem(uint256,address,address).selector ||
+        f.selector == claimRewardsOnBehalf(address,address,address[]).selector ||
+        f.selector == metaDeposit(address,address,uint256,uint16,bool,uint256,(address,address,uint256,uint256,uint8,bytes32,bytes32),(uint8,bytes32,bytes32)).selector ||
+        f.selector == getRewardTokensLength().selector ||
+        f.selector == getTotalClaimableRewards(address).selector ||
+        f.selector == getSelf().selector ||
+        f.selector == claimSingleRewardOnBehalf(address,address,address).selector ||
+        f.selector == getRewardToken(uint256).selector ||
+        f.selector == previewDeposit(uint256).selector ||
+        f.selector == aToken().selector ||
+        f.selector == maxRedeemUnderlying(address).selector ||
+        f.selector == transferFrom(address,address,uint256).selector ||
+        f.selector == totalSupply().selector ||
+        f.selector == deposit(uint256,address).selector ||
+        f.selector == decimals().selector ||
+        f.selector == previewWithdraw(uint256).selector ||
+        f.selector == metaWithdraw(address,address,uint256,uint256,bool,uint256,(uint8,bytes32,bytes32)).selector ||
+        f.selector == maxDeposit(address).selector ||
+        f.selector == maxRedeem(address).selector);
 
 ////////////////// FUNCTIONS //////////////////////
 
@@ -137,6 +214,10 @@ methods
     function single_RewardToken_setup() {
         require getRewardTokensLength() == 1;
         require getRewardToken(0) == _DummyERC20_rewardToken;
+    }
+
+    function zero_RewardToken_setup() {
+        require getRewardTokensLength() == 0;
     }
 
     /**
@@ -166,5 +247,5 @@ methods
         require _SymbolicLendingPool != user;
         require _TransferStrategy != user;
         require _TransferStrategy != user;
-        require getReserveData_AToken() == _AToken;
     }
+

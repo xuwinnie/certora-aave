@@ -20,13 +20,13 @@ import "../methods/methods_base.spec"
             uint256 assets;
             uint256 shares;
 
-            uint256 maxWithdraw1 = maxWithdraw(e1, user);
+            uint256 maxWithdraw1 = maxWithdraw(user);
             require assets > maxWithdraw1;
             uint256 previewShares1 = previewWithdraw(e1, assets);
 
             mint(e2, shares, user);
 
-            uint256 maxWithdraw2 = maxWithdraw(e3, user);
+            uint256 maxWithdraw2 = maxWithdraw(user);
             require assets ==  maxWithdraw2;
             uint256 previewShares2 = previewWithdraw(e3, assets);
 
@@ -43,13 +43,13 @@ import "../methods/methods_base.spec"
             uint256 assets;
             uint256 shares;
 
-            uint256 maxWithdraw1 = maxWithdraw(e1, user);
+            uint256 maxWithdraw1 = maxWithdraw(user);
             require assets == maxWithdraw1;
             uint256 previewShares1 = previewWithdraw(e1, assets);
 
             mint(e2, shares, user);
 
-            uint256 maxWithdraw2 = maxWithdraw(e3, user);
+            uint256 maxWithdraw2 = maxWithdraw(user);
             require assets <  maxWithdraw2;
             uint256 previewShares2 = previewWithdraw(e3, assets);
 
