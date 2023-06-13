@@ -66,3 +66,4 @@ jobs:
         rule: 
             - certora/conf/verify_erc4626_verified.conf --rules
             - certora/conf/verify_staticatokenlm_verified.conf --rules           
+
