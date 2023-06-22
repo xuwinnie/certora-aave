@@ -65,5 +65,5 @@ jobs:
         patch: ${{ fromJson(needs.list-patches.outputs.matrix) }} 
         rule: 
             - certora/conf/verify_erc4626_verified.conf
-            - certora/conf/verify_staticatokenlm_verified.conf          
+            - certora/conf/verify_staticatokenlm_verified.conf
 
