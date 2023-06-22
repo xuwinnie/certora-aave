@@ -89,7 +89,7 @@ struct ReserveConfigurationMap {
         require(asset == address(underlyingToken));
         underlyingToken.transferFrom(
             msg.sender,
-            address(this),
+            address(aToken),
             amount
         );
         aToken.mint(
@@ -119,7 +119,6 @@ struct ReserveConfigurationMap {
             amount,
             liquidityIndex[block.timestamp]
         );
-        underlyingToken.transferFrom(address(aToken),to,amount);
         return amount;
     }
 
