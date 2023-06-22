@@ -42,6 +42,7 @@ jobs:
 
       - name: Install certora cli
         run: pip3 install certora-cli==3.6.8.post3
+
       
       - name: Install solc
         run: |
@@ -65,3 +66,4 @@ jobs:
         rule: 
             - certora/conf/verify_erc4626_verified.conf
             - certora/conf/verify_staticatokenlm_verified.conf
+
